@@ -234,7 +234,7 @@ namespace Nektar
         const NekDouble time,
         const NekDouble lambda)
     {
-        boost::ignore_unused(time);
+        SetBoundaryConditions(time);
 
         StdRegions::ConstFactorMap factors;
 
