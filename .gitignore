@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+build
+buildDebug
+
+# Run directories
+runs/*
+!runs/template
