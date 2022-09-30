@@ -37,4 +37,4 @@ buildDebug
 
 # Run directories
 runs/*
-!runs/template
+!runs/templates/

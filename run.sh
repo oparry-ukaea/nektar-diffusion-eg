@@ -3,7 +3,7 @@
 # Defaults - run in debug and output to a subdirectory tagged with the current date and time
 MODE="DEBUG"
 RUN_SUBDIR="$(date +%Y-%m-%d_%H-%M)"
-
+TEMPLATE_SUBDIR="sin"
 # Parse command line args
 for arg in $*; do
     case "$arg" in
@@ -11,12 +11,15 @@ for arg in $*; do
             MODE=${arg:5};;
         subdir=*)
             RUN_SUBDIR=${arg:7};;
+        template=*)
+            TEMPLATE_SUBDIR=${arg:9};;
         *)
             echo "Unrecognised argument: $arg"
             echo "Usage:"
-            echo " $0 <mode=mode_str> <subdir=label>"
-            echo "    mode_str : 'DEBUG' or 'RELEASE' (default='DEBUG'; case insensitive)"
-            echo "    label    : name of the subdirectory in ./runs/ in which to execute solver (default is YY-mm-DD_HH-MM)"
+            echo " $0 <mode=mode_str> <subdir=label> <template=template_name>"
+            echo "    mode_str      : 'DEBUG' or 'RELEASE' (default='DEBUG'; case insensitive)"
+            echo "    label         : name of the subdirectory in ./runs/ in which to execute solver (default is YY-mm-DD_HH-MM)"
+            echo "    template_name : name of a subdirectory in runs/templates on which to base this run"
             exit 1
     esac
 done
@@ -35,13 +38,19 @@ esac
 REPO_ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BIN_DIR="$REPO_ROOT/$BUILD_SUBDIR/dist"
 RUNS_DIR="$REPO_ROOT/runs"
-RUN_TEMPLATE="$RUNS_DIR/template"
+RUN_TEMPLATE="$RUNS_DIR/templates/$TEMPLATE_SUBDIR"
 EXEC_PATH="$BIN_DIR/ADRSolver"
+
+# Check template exists
+if [ ! -d "$RUN_TEMPLATE" ]; then
+    echo "No run template at $RUN_TEMPLATE"
+    exit 3
+fi
 
 # Check executable exists
 if [ ! -e "$EXEC_PATH" ]; then
     echo "No solver executable at $EXEC_PATH"
-    exit 3
+    exit 4
 fi
 
 # Set run directory and confirm overwrite if it exists
