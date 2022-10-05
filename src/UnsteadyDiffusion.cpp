@@ -144,7 +144,6 @@ namespace Nektar
             {
                 if (!userFuncName.empty() && userFuncName!="TimeDependent")
                 {
-                    std::cout << "  Condition " << n << ": Adding custom BC type " << userFuncName << std::endl;
                     m_userDefinedBCs.push_back(GetCFSBndCondFactory().CreateInstance(
                                             userFuncName,
                                             m_session,
