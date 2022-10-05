@@ -41,6 +41,28 @@ using namespace std;
 using namespace Nektar;
 using namespace Nektar::SolverUtils;
 
+void confirm_start(LibUtilities::CommSharedPtr comm) {
+    int cont=0;
+    if (comm->TreatAsRankZero())
+    {
+        std:: cout << "[Y/y] to continue" << std::endl;
+        std::string response;
+        std::cin >> response;
+        boost::to_upper(response);
+        cont = (response=="Y");
+    }
+    comm->Bcast(cont, 0);
+    if (!cont)
+    {
+        if (comm->TreatAsRankZero())
+        {
+            std::cout << "Aborting run" << std::endl;
+        }
+        comm->Finalise();
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     LibUtilities::SessionReaderSharedPtr session;
@@ -53,7 +75,9 @@ int main(int argc, char *argv[])
     {
         // Create session reader.
         session = LibUtilities::SessionReader::CreateInstance(argc, argv);
-
+#ifdef DEBUG
+        confirm_start(session->GetComm());
+#endif
         LIKWID_MARKER_INIT;
         LIKWID_MARKER_THREADINIT;
         LIKWID_MARKER_REGISTER("v_BwdTrans_IterPerExp");
