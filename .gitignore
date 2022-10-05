@@ -38,3 +38,6 @@ buildDebug
 # Run directories
 runs/*
 !runs/templates/
+
+# VS code config
+settings.json
