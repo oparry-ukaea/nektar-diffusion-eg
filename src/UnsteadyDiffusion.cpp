@@ -33,6 +33,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "UnsteadyDiffusion.h"
+#include "BoundaryConditions/CFSBndCond.h"
 #include <LibUtilities/TimeIntegration/TimeIntegrationScheme.h>
 #include <iostream>
 #include <iomanip>
@@ -131,6 +132,31 @@ namespace Nektar
             m_ode.DefineImplicitSolve(
                                 &UnsteadyDiffusion::DoImplicitSolve, this);
         }
+
+        // Initialise user-defined BCs
+        int cnt = 0;
+        int Nconditions=m_fields[0]->GetBndConditions().size();
+        for (int n = 0; n < Nconditions; ++n)
+        {
+            std::string userFuncName = m_fields[0]->GetBndConditions()[n]->GetUserDefined();
+            auto type = m_fields[0]->GetBndConditions()[n]->GetBoundaryConditionType();
+            if (type != SpatialDomains::ePeriodic)
+            {
+                if (!userFuncName.empty() && userFuncName!="TimeDependent")
+                {
+                    std::cout << "  Condition " << n << ": Adding custom BC type " << userFuncName << std::endl;
+                    m_userDefinedBCs.push_back(GetCFSBndCondFactory().CreateInstance(
+                                            userFuncName,
+                                            m_session,
+                                            m_fields,
+                                            m_traceNormals,
+                                            m_spacedim,
+                                            n,
+                                            cnt));
+                }
+                cnt += m_fields[0]->GetBndCondExpansions()[n]->GetExpSize();
+            }
+        }
     }
 
     /**
@@ -188,18 +214,24 @@ namespace Nektar
               Array<OneD,       Array<OneD, NekDouble> > &outarray,
         const NekDouble time)
     {
-        int i;
-        int nvariables = inarray.size();
+        // Impose regular (function-defined) time-dependent BCs
         SetBoundaryConditions(time);
+        
+        int nvariables = inarray.size();
+        int npoints = GetNpoints();
+        // Impose custom BCs (based on user-defined classes)
+        for (int i = 0; i < nvariables; ++i)
+        {
+            Vmath::Vcopy(npoints, inarray[i], 1, outarray[i], 1);
+            SetUserDefinedBoundaryConditions(outarray, time);
+        }
 
         switch(m_projectionType)
         {
             case MultiRegions::eDiscontinuous:
             {
                 // Just copy over array
-                int npoints = GetNpoints();
-
-                for(i = 0; i < nvariables; ++i)
+                for(auto i = 0; i < nvariables; ++i)
                 {
                     Vmath::Vcopy(npoints, inarray[i], 1, outarray[i], 1);
                 }
@@ -210,7 +242,7 @@ namespace Nektar
             {
                 Array<OneD, NekDouble> coeffs(m_fields[0]->GetNcoeffs());
 
-                for(i = 0; i < nvariables; ++i)
+                for(auto i = 0; i < nvariables; ++i)
                 {
                     m_fields[i]->FwdTrans(inarray[i], coeffs);
                     m_fields[i]->BwdTrans_IterPerExp(coeffs, outarray[i]);
@@ -234,15 +266,22 @@ namespace Nektar
         const NekDouble time,
         const NekDouble lambda)
     {
-        SetBoundaryConditions(time);
-
-        StdRegions::ConstFactorMap factors;
-
         int nvariables = inarray.size();
         int npoints    = m_fields[0]->GetNpoints();
+
+        // Impose regular (function-defined) time-dependent BCs
+        SetBoundaryConditions(time);
+        // Impose custom BCs (based on user-defined classes)
+        for (int i = 0; i < nvariables; ++i)
+        {
+            Vmath::Vcopy(npoints, inarray[i], 1, outarray[i], 1);
+            SetUserDefinedBoundaryConditions(outarray, time);
+        }
+
+        // Populate factors map
+        StdRegions::ConstFactorMap factors;        
         factors[StdRegions::eFactorLambda] = 1.0 / lambda / m_epsilon;
         factors[StdRegions::eFactorTau]    = 1.0;
-
         if(m_useSpecVanVisc)
         {
             factors[StdRegions::eFactorSVVCutoffRatio] = m_sVVCutoffRatio;
@@ -294,6 +333,30 @@ namespace Nektar
             {
                 Vmath::Smul(nPts, m_epsilon, qfield[j][i], 1,
                     viscousTensor[j][i], 1 );
+            }
+        }
+    }
+
+    void UnsteadyDiffusion::SetUserDefinedBoundaryConditions(
+    Array<OneD, Array<OneD, NekDouble>> &physarray,
+    NekDouble                           time)
+    {
+        int nTracePts  = GetTraceTotPoints();
+        int nvariables = physarray.size();
+
+        Array<OneD, Array<OneD, NekDouble>> Fwd(nvariables);
+        for (int i = 0; i < nvariables; ++i)
+        {
+            Fwd[i] = Array<OneD, NekDouble>(nTracePts);
+            m_fields[i]->ExtractTracePhys(physarray[i], Fwd[i]);
+        }
+
+        if (m_userDefinedBCs.size())
+        {
+            // Loop over user-defined boundary conditions
+            for (auto &x : m_userDefinedBCs)
+            {
+                x->Apply(Fwd, physarray, time);
             }
         }
     }

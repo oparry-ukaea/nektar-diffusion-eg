@@ -37,6 +37,10 @@ ADD_EXECUTABLE(ADRSolver
     src/ADRSolver.cpp
     src/UnsteadyDiffusion.h
     src/UnsteadyDiffusion.cpp
+    src/BoundaryConditions/CFSBndCond.h
+    src/BoundaryConditions/CFSBndCond.cpp
+    src/BoundaryConditions/ChaoticBCs.h
+    src/BoundaryConditions/ChaoticBCs.cpp
     )
 
 # Add target link libraries.

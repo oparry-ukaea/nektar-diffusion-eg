@@ -35,6 +35,7 @@
 #ifndef NEKTAR_SOLVERS_ADRSOLVER_EQUATIONSYSTEMS_UNSTEADYDIFFUSION_H
 #define NEKTAR_SOLVERS_ADRSOLVER_EQUATIONSYSTEMS_UNSTEADYDIFFUSION_H
 
+#include "BoundaryConditions/CFSBndCond.h"
 #include <SolverUtils/UnsteadySystem.h>
 #include <SolverUtils/Diffusion/Diffusion.h>
 
@@ -97,9 +98,12 @@ namespace Nektar
             NekDouble lambda);
 
     private:
-        NekDouble m_waveFreq;
         NekDouble m_epsilon;
+        std::vector<CFSBndCondSharedPtr> m_userDefinedBCs;
         StdRegions::VarCoeffMap m_varcoeff;
+        NekDouble m_waveFreq;
+
+        void SetUserDefinedBoundaryConditions(Array<OneD, Array<OneD, NekDouble>> &physarray, NekDouble time);
     };
 }
 
