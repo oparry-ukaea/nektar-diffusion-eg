@@ -36,11 +36,23 @@
 #define NEKTAR_SOLVERS_COMPRESSIBLEFLOWSOLVER_BNDCOND_ChaoticBCs
 
 #include "CFSBndCond.h"
-
+#include <SolverUtils/Core/SessionFunction.h>
+#include <FieldUtils/Interpolator.h>
 
 namespace Nektar
 {
 
+// Structs
+struct FuncDef
+{
+    FuncDef(std::string fieldName, MultiRegions::ExpListSharedPtr field, int domain, SolverUtils::SessionFunctionSharedPtr func) :
+    m_fieldName(fieldName), m_field(field), m_domain(domain), m_func(func) {}
+    std::string m_fieldName;
+    MultiRegions::ExpListSharedPtr m_field;
+    int m_domain;
+    SolverUtils::SessionFunctionSharedPtr m_func;
+};
+typedef std::shared_ptr<FuncDef> FuncDefShPtr;
 /**
 * @brief Chaotic boundary conditions.
 */
@@ -77,12 +89,19 @@ class ChaoticBCs : public CFSBndCond
         Array<OneD, NekDouble>               m_VnInf;
 
     private:
+        std::map<int,FuncDefShPtr> m_funcDefs;
+
         ChaoticBCs(const LibUtilities::SessionReaderSharedPtr& pSession,
                const Array<OneD, MultiRegions::ExpListSharedPtr>& pFields,
                const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
                const int pSpaceDim,
                const int bcRegion,
                const int cnt);
+
+
+
+        std::string GetBCFunctionName(int varIdx);
+        std::string GetBCFunctionName(std::string varName);
         
         virtual ~ChaoticBCs(void){};
 };

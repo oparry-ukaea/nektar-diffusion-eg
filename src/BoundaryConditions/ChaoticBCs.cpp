@@ -55,19 +55,50 @@ ChaoticBCs::ChaoticBCs(
            const int cnt)
     : CFSBndCond(pSession, pFields, pTraceNormals, pSpaceDim, bcRegion, cnt)
 {
-    // // Calculate VnInf
-    // int nTracePts = m_fields[0]->GetTrace()->GetNpoints();
-    // m_VnInf = Array<OneD, NekDouble> (nTracePts, 0.0);
+    // For each field
+    for(auto ii = 0; ii < pFields.size(); ++ii)
+    {
+        std::string varName = pSession->GetVariable(ii);
+        std::string funcName = GetBCFunctionName(varName);
+        auto conditions = pFields[ii]->GetBndConditions();
+        auto conditionExpLists = pFields[ii]->GetBndCondExpansions();
+        for (auto jj=0;jj<conditions.size();++jj)
+        {
+            // For each conditions defined for this field
+            std::string userFuncType = conditions[jj]->GetUserDefined();
+            if (userFuncType==className)
+            {
+                if (pSession->DefinesFunction(funcName))
+                {
+                    bool funcAlreadyDefinedForVar = m_funcDefs.find(ii) != m_funcDefs.end();
+                    if (funcAlreadyDefinedForVar)
+                    {
+                        NEKERROR(ErrorUtil::efatal, "Only one" + className + " BC is allowed per field - multiple declarations for field "+varName);
+                    }
+                    else
+                    {
+                        SolverUtils::SessionFunctionSharedPtr func = MemoryManager<SolverUtils::SessionFunction>::AllocateSharedPtr(pSession, pFields[ii], funcName, true);
+                        m_funcDefs[ii] = MemoryManager<FuncDef>::AllocateSharedPtr(varName,conditionExpLists[jj],0,func);
+                    }
+                }
+                else
+                {
+                    // Bail out if no associated function is defined by the session
+                    NEKERROR(ErrorUtil::efatal, className+" declared for field "+varName+"; session must define a function called "+funcName);
+                }
+            }
+        } 
+    }
+}
 
-    // // Computing the normal velocity for characteristics coming
-    // // from outside the computational domain
-    // for( int i =0; i < m_spacedim; i++)
-    // {
-    //     Vmath::Svtvp(nTracePts, m_velInf[i],
-    //                  m_traceNormals[i], 1,
-    //                  m_VnInf, 1,
-    //                  m_VnInf, 1);
-    // }
+std::string ChaoticBCs::GetBCFunctionName(int varIdx)
+{
+    return GetBCFunctionName(m_session->GetVariable(varIdx));
+}
+
+std::string ChaoticBCs::GetBCFunctionName(std::string varName)
+{
+    return varName+"BCs";
 }
 
 void ChaoticBCs::v_Apply(
@@ -75,7 +106,31 @@ void ChaoticBCs::v_Apply(
         Array<OneD, Array<OneD, NekDouble> >               &physarray,
         const NekDouble                                    &time)
 {
-    boost::ignore_unused(Fwd, physarray, time);
+    //boost::ignore_unused(Fwd, physarray, time);
+
+    boost::ignore_unused(Fwd);
+    for(auto ii = 0; ii < physarray.size(); ++ii)
+    {
+        auto entry = m_funcDefs.find(ii);
+        if (entry != m_funcDefs.end())
+        {
+            FuncDefShPtr def = entry->second;
+            Array<OneD, NekDouble> pArray;
+            (def->m_func)->Evaluate(def->m_fieldName, pArray, time, def->m_domain);
+
+            MultiRegions::ExpListSharedPtr locExpList = def->m_field;
+            int npoints = locExpList->GetNpoints();
+            Array<OneD, NekDouble> x0(npoints, 0.0);
+            Array<OneD, NekDouble> x1(npoints, 0.0);
+            Array<OneD, NekDouble> x2(npoints, 0.0);
+
+            locExpList->GetCoords(x0, x1, x2);
+            NekDouble val = pArray[0];
+
+            locExpList->SetCoeff(0, val);               
+            locExpList->SetPhys(0, locExpList->GetCoeff(0));
+        }
+    }
 }
 
 }

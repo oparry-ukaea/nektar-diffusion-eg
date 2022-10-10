@@ -265,6 +265,10 @@
             </REGION>
         </BOUNDARYCONDITIONS>
 
+        <FUNCTION NAME="uBCs"> 
+            <F VAR="u" TIMEDEPENDENT="1" FILE="BCVals_%8.2E.csv"/> 
+        </FUNCTION>
+
         <FUNCTION NAME="ExactSolution">
             <E VAR="u" VALUE="1" />
         </FUNCTION>
