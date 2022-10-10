@@ -258,7 +258,7 @@
 
         <BOUNDARYCONDITIONS>
             <REGION REF="0">
-                <D VAR="u" USERDEFINEDTYPE="ChaoticBCs" VALUE="0" />
+                <D VAR="u" USERDEFINEDTYPE="FileBasedBCs" VALUE="0" />
             </REGION>
             <REGION REF="1">
                 <D VAR="u" VALUE="0" />

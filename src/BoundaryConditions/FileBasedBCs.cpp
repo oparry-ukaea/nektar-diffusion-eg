@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// File: ChaoticBCs.cpp
+// File: FileBasedBCs.cpp
 //
 // For more information, please see: http://www.nektar.info
 //
@@ -28,25 +28,25 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //
-// Description: Chaotic boundary condition
+// Description: FileBased boundary condition
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/core/ignore_unused.hpp>
 
-#include "ChaoticBCs.h"
+#include "FileBasedBCs.h"
 
 using namespace std;
 
 namespace Nektar
 {
 
-std::string ChaoticBCs::className = GetCFSBndCondFactory().
-    RegisterCreatorFunction("ChaoticBCs",
-                            ChaoticBCs::create,
-                            "Chaotic boundary condition.");
+std::string FileBasedBCs::className = GetCFSBndCondFactory().
+    RegisterCreatorFunction("FileBasedBCs",
+                            FileBasedBCs::create,
+                            "FileBased boundary condition.");
 
-ChaoticBCs::ChaoticBCs(
+FileBasedBCs::FileBasedBCs(
            const LibUtilities::SessionReaderSharedPtr& pSession,
            const Array<OneD, MultiRegions::ExpListSharedPtr>& pFields,
            const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
@@ -91,17 +91,17 @@ ChaoticBCs::ChaoticBCs(
     }
 }
 
-std::string ChaoticBCs::GetBCFunctionName(int varIdx)
+std::string FileBasedBCs::GetBCFunctionName(int varIdx)
 {
     return GetBCFunctionName(m_session->GetVariable(varIdx));
 }
 
-std::string ChaoticBCs::GetBCFunctionName(std::string varName)
+std::string FileBasedBCs::GetBCFunctionName(std::string varName)
 {
     return varName+"BCs";
 }
 
-void ChaoticBCs::v_Apply(
+void FileBasedBCs::v_Apply(
         Array<OneD, Array<OneD, NekDouble> >               &Fwd,
         Array<OneD, Array<OneD, NekDouble> >               &physarray,
         const NekDouble                                    &time)

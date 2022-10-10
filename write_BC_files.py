@@ -25,7 +25,7 @@ def get_times(dstep = 5e-3,nsteps = 1000,substeps = [0, 2.18e-3, 3.59e-3]):
 #==================================================================================================
 
 #==================================================================================================
-def main(template="chaotic"):
+def main(template="file-based"):
     root_dir = os.path.dirname(os.path.realpath(__file__))
     for time in get_times():
         fname = "BCVals_{:5.2E}.csv".format(time)

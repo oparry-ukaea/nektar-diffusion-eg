@@ -37,7 +37,9 @@ buildDebug
 
 # Run directories
 runs/*
-!runs/templates/*.xml
+# Only ignore csv files in the run templates dirs
+!runs/templates
+runs/templates/**/*.csv
 
 # VS code config
 settings.json

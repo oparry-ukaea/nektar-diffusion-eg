@@ -3,7 +3,7 @@
 # Defaults - run in debug and output to a subdirectory tagged with the current date and time
 MODE="DEBUG"
 RUN_SUBDIR="$(date +%Y-%m-%d_%H-%M)"
-TEMPLATE_SUBDIR="chaotic"
+TEMPLATE_SUBDIR="file-based_sin"
 # Parse command line args
 for arg in $*; do
     case "$arg" in
