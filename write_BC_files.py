@@ -5,13 +5,13 @@ import csv
 
 #==================================================================================================
 def write_file(fpath,time,Omega=2.0):
-    u = math.sin(Omega*time)
-    header_vals = ["x","u"]
+    T = math.sin(Omega*time)
+    header_vals = ["x","T"]
     with open(fpath, 'w') as fh:
         writer = csv.writer(fh)
         writer.writerow(header_vals)
-        writer.writerow([0,u])
-        writer.writerow([1,u])
+        writer.writerow([0,T])
+        writer.writerow([1,T])
 #==================================================================================================
 
 #==================================================================================================

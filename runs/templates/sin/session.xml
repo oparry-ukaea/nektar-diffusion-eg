@@ -227,7 +227,7 @@
     </GEOMETRY>
 
     <EXPANSIONS>
-        <E COMPOSITE="C[0]" NUMMODES="10" FIELDS="u" TYPE="MODIFIED" />
+        <E COMPOSITE="C[0]" NUMMODES="10" FIELDS="T" TYPE="MODIFIED" />
     </EXPANSIONS>
 
     <CONDITIONS>
@@ -248,7 +248,7 @@
         </SOLVERINFO>
 
         <VARIABLES>
-            <V ID="0"> u </V>
+            <V ID="0"> T </V>
         </VARIABLES>
 
         <BOUNDARYREGIONS>
@@ -258,19 +258,19 @@
 
         <BOUNDARYCONDITIONS>
             <REGION REF="0">
-                <D VAR="u" USERDEFINEDTYPE="TimeDependent" VALUE="sin(2*PI*Omega*t)" />
+                <D VAR="T" USERDEFINEDTYPE="TimeDependent" VALUE="sin(2*PI*Omega*t)" />
             </REGION>
             <REGION REF="1">
-                <D VAR="u" VALUE="0" />
+                <D VAR="T" VALUE="0" />
             </REGION>
         </BOUNDARYCONDITIONS>
 
         <FUNCTION NAME="ExactSolution">
-            <E VAR="u" VALUE="1" />
+            <E VAR="T" VALUE="1" />
         </FUNCTION>
 
         <FUNCTION NAME="InitialConditions">
-            <E VAR="u" VALUE="0" />
+            <E VAR="T" VALUE="0" />
         </FUNCTION>
 
     </CONDITIONS>
