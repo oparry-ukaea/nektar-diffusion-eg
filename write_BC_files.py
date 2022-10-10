@@ -15,7 +15,7 @@ def write_file(fpath,time,Omega=2.0):
 #==================================================================================================
 
 #==================================================================================================
-def get_times(dstep = 1e-3,nsteps = 1000,substeps = [0, 4.36e-4, 7.18e-4]):
+def get_times(dstep = 5e-3,nsteps = 1000,substeps = [0, 2.18e-3, 3.59e-3]):
     # Generate timestep pattern (for implicit)   
     steps = [ii*dstep for ii in range(nsteps)]    
     times = []
