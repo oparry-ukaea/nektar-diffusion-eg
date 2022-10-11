@@ -37,7 +37,7 @@ buildDebug
 
 # Run directories
 runs/*
-!runs/templates/
+!runs/templates/*.xml
 
 # VS code config
 settings.json
