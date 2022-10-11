@@ -41,5 +41,8 @@ runs/*
 !runs/templates
 runs/templates/**/*.csv
 
+# Data directories
+data/lorenz_output.txt
+
 # VS code config
 settings.json
