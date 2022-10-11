@@ -68,23 +68,31 @@ FileBasedBCs::FileBasedBCs(
             std::string userFuncType = conditions[jj]->GetUserDefined();
             if (userFuncType==className)
             {
-                if (pSession->DefinesFunction(funcName))
-                {
-                    bool funcAlreadyDefinedForVar = m_funcDefs.find(ii) != m_funcDefs.end();
-                    if (funcAlreadyDefinedForVar)
-                    {
-                        NEKERROR(ErrorUtil::efatal, "Only one" + className + " BC is allowed per field - multiple declarations for field "+varName);
-                    }
-                    else
-                    {
-                        SolverUtils::SessionFunctionSharedPtr func = MemoryManager<SolverUtils::SessionFunction>::AllocateSharedPtr(pSession, pFields[ii], funcName, true);
-                        m_funcDefs[ii] = MemoryManager<FuncDef>::AllocateSharedPtr(varName,conditionExpLists[jj],0,func);
-                    }
-                }
-                else
-                {
-                    // Bail out if no associated function is defined by the session
-                    NEKERROR(ErrorUtil::efatal, className+" declared for field "+varName+"; session must define a function called "+funcName);
+                SpatialDomains::BoundaryConditionType BCType = conditions[jj]->GetBoundaryConditionType();
+                switch (BCType){
+                    case SpatialDomains::eDirichlet: // fall-through
+                    case SpatialDomains::eNeumann:                
+                        if (pSession->DefinesFunction(funcName))
+                        {
+                            bool funcAlreadyDefinedForVar = m_funcDefs.find(ii) != m_funcDefs.end();
+                            if (funcAlreadyDefinedForVar)
+                            {
+                                NEKERROR(ErrorUtil::efatal, "Only one" + className + " BC is allowed per field - multiple declarations for field "+varName);
+                            }
+                            else
+                            {
+                                SolverUtils::SessionFunctionSharedPtr func = MemoryManager<SolverUtils::SessionFunction>::AllocateSharedPtr(pSession, pFields[ii], funcName, true);
+                                m_funcDefs[ii] = MemoryManager<FuncDef>::AllocateSharedPtr(varName, conditionExpLists[jj], 0, BCType, func);
+                            }
+                        }
+                        else
+                        {
+                            // Bail out if no associated function is defined by the session
+                            NEKERROR(ErrorUtil::efatal, className+" declared for field "+varName+"; session must define a function called "+funcName);
+                        }
+                        break;
+                default:
+                    NEKERROR(ErrorUtil::efatal, "Invalid BCs type for var " + varName + "; only Dirichlet (D) and Neumann (N) allowed for " + className);
                 }
             }
         } 
@@ -106,8 +114,6 @@ void FileBasedBCs::v_Apply(
         Array<OneD, Array<OneD, NekDouble> >               &physarray,
         const NekDouble                                    &time)
 {
-    //boost::ignore_unused(Fwd, physarray, time);
-
     boost::ignore_unused(Fwd);
     for(auto ii = 0; ii < physarray.size(); ++ii)
     {
@@ -129,6 +135,15 @@ void FileBasedBCs::v_Apply(
 
             locExpList->SetCoeff(0, val);               
             locExpList->SetPhys(0, locExpList->GetCoeff(0));
+
+            // Dirichlet and Neumann
+            locExpList->SetCoeff(0, val);
+
+            // Dirichlet only
+            if (def->m_BCType == SpatialDomains::eDirichlet)
+            {
+                locExpList->SetPhys(0, locExpList->GetCoeff(0));
+            }
         }
     }
 }

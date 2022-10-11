@@ -45,8 +45,9 @@ namespace Nektar
 // Structs
 struct FuncDef
 {
-    FuncDef(std::string fieldName, MultiRegions::ExpListSharedPtr field, int domain, SolverUtils::SessionFunctionSharedPtr func) :
-    m_fieldName(fieldName), m_field(field), m_domain(domain), m_func(func) {}
+    FuncDef(std::string fieldName, MultiRegions::ExpListSharedPtr field, int domain, SpatialDomains::BoundaryConditionType BCType, SolverUtils::SessionFunctionSharedPtr func) :
+    m_fieldName(fieldName), m_field(field), m_domain(domain), m_BCType(BCType), m_func(func) {}
+    SpatialDomains::BoundaryConditionType m_BCType;
     std::string m_fieldName;
     MultiRegions::ExpListSharedPtr m_field;
     int m_domain;
