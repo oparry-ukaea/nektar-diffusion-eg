@@ -5,6 +5,9 @@ import csv
 
 root_dir = os.path.dirname(os.path.realpath(__file__))
 
+# Dirk3 Lambda value from https://doc.nektar.info/developerguide/5.0.2/developer-guidese22.html
+dt_params_global = dict(orig=dict(dt=0.001, nit=100000),dirk3=dict(step=0.001,Nstep=1000,_lambda=0.4358665215))
+
 #==================================================================================================
 def get_BCs(mode='lorenz', **mode_opts):
     times = get_times()
@@ -25,18 +28,32 @@ def get_temps(times, mode='lorenz', **mode_opts):
 #==================================================================================================
 
 #==================================================================================================
-def get_times(dstep = 5e-3,nsteps = 1000,substeps = [0, 2.18e-3, 3.59e-3]):
-    # Generate timestep pattern (for implicit)   
-    steps = [ii*dstep for ii in range(nsteps)]    
-    times = []
-    for step in steps:
-        times.extend([step+substep for substep in substeps])
+def gen_timesteps(all_dt_params,dt_mode='fixed'):
+    dt_params = all_dt_params[dt_mode]
+    if dt_mode=="orig":
+        dts = [dt_params["dt"]]*dt_params["nit"]
+    elif dt_mode=="dirk3":
+        substep_ratios= [dt_params["_lambda"], (1-dt_params["_lambda"])/2, (1-dt_params["_lambda"])/2]
+        dts = []
+        for ii in range(dt_params["Nstep"]):
+            dts.extend([r*dt_params["step"] for r in substep_ratios])
+    return dts
+#==================================================================================================
+
+#==================================================================================================
+def get_times(dt_mode='dirk3'):
+    dts = gen_timesteps(dt_params_global, dt_mode=dt_mode)
+    # Prepend t=0
+    times = [0]
+    # Sum dts, excluding final one
+    for ii in range(len(dts)-1):
+        times.append(times[ii]+dts[ii])
     return times
 #==================================================================================================
 
 #==================================================================================================
 def read_lorenz_data(npoints,nstride=1,r=28.0):
-    data_fpath = os.path.join(root_dir,"data","orig","lorenz.csv")
+    data_fpath = os.path.join(root_dir,"data","lorenz.csv")
     data = []
     with open(data_fpath) as fh:
         _ = fh.readline() # skip header
