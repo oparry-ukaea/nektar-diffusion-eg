@@ -32,7 +32,7 @@ int main()
 
     //quick test of Lorenz, generate time series
 #if 1
-    FILE* outFile = fopen("lorenz_output.txt", "w");  //MUST REPLACE WITH SOMETHING SENSIBLE!
+    FILE* outFile = fopen("orig/lorenz.csv", "w");
 
     fprintf(outFile, "x,y,z\n");
 
@@ -43,7 +43,7 @@ int main()
     for (int it = 0; it < 100000; it++)  //time loop
     {
         EvaluateLorenz(0.0, x, y, z);
-        fprintf(outFile, "%.6e, %.6e, %.6e\n", x, y, z);  
+        fprintf(outFile, "%.6e,%.6e,%.6e\n", x, y, z);  
     }
     fclose(outFile);
     return 1;

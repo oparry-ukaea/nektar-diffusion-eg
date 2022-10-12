@@ -42,7 +42,7 @@ runs/*
 runs/templates/**/*.csv
 
 # Data directories
-data/lorenz_output.txt
+data/lorenz.csv
 
 # VS code config
 settings.json
