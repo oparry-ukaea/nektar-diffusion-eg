@@ -257,7 +257,7 @@
 
         <BOUNDARYCONDITIONS>
             <REGION REF="0">
-                <N VAR="T" USERDEFINEDTYPE="FileBasedBCs" VALUE="0" />
+                <N VAR="T" USERDEFINEDTYPE="FileBasedBCs"/>
             </REGION>
             <REGION REF="1">
                 <D VAR="T" VALUE="0" />
