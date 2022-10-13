@@ -232,11 +232,11 @@
 
     <CONDITIONS>
         <PARAMETERS>
-            <P> TimeStep       = 0.005            </P>
-            <P> NumSteps       = 1000             </P>
-            <P> IO_CheckSteps  = 10               </P>
-            <P> IO_InfoSteps   = 100              </P>
-            <P> epsilon        = 1000.0           </P>
+            <P> TimeStep       = 0.001            </P>
+            <P> NumSteps       = 10000            </P>
+            <P> IO_CheckSteps  = NumSteps/100     </P>
+            <P> IO_InfoSteps   = NumSteps/10      </P>
+            <P> epsilon        = 10000.0          </P>
         </PARAMETERS>
 
         <SOLVERINFO>
@@ -257,7 +257,7 @@
 
         <BOUNDARYCONDITIONS>
             <REGION REF="0">
-                <D VAR="T" USERDEFINEDTYPE="FileBasedBCs" VALUE="0" />
+                <N VAR="T" USERDEFINEDTYPE="FileBasedBCs" VALUE="0" />
             </REGION>
             <REGION REF="1">
                 <D VAR="T" VALUE="0" />

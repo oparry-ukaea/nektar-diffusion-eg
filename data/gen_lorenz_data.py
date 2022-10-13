@@ -10,7 +10,7 @@ B_coeffs = [0.1028639988105, 0.7408540575767, 0.7426530946684, 0.4694937902358, 
 ICs           = dict(x=np.double(0.0), y=np.double(1.0), z=np.double(0.0))
 coeffs        = dict(A=A_coeffs, B=B_coeffs)
 # Dirk3 Lambda value from https://doc.nektar.info/developerguide/5.0.2/developer-guidese22.html
-all_dt_params = dict(orig=dict(dt=0.001, nit=100000),dirk3=dict(step=0.001,Nstep=1000,_lambda=0.4358665215))
+all_dt_params = dict(orig=dict(dt=0.001, nit=100000),dirk3=dict(step=0.001,Nstep=10000,_lambda=0.4358665215))
 global_params = dict(ICs=ICs, coeffs=coeffs, sigma=10.0, rho=28.0, beta=8.0/3.0, dt=all_dt_params)
 
 #==================================================================================================
