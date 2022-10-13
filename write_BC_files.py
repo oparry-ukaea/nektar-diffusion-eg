@@ -7,7 +7,7 @@ root_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Dirk3 Lambda value from https://doc.nektar.info/developerguide/5.0.2/developer-guidese22.html
 dt_params_global = dict(orig=dict(dt=0.001, nit=100000),dirk3=dict(step=0.001,Nstep=10000,_lambda=0.4358665215))
-k = 40000 # Thermal conductivity in W/m^2/K
+k = 1 # Thermal conductivity in W/m^2/K
 #==================================================================================================
 def get_BCs(mode='lorenz', **mode_opts):
     times = get_times()
