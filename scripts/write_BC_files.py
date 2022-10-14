@@ -3,7 +3,7 @@ import os
 import os.path
 import csv
 
-root_dir = os.path.dirname(os.path.realpath(__file__))
+scripts_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Dirk3 Lambda value from https://doc.nektar.info/developerguide/5.0.2/developer-guidese22.html
 dt_params_global = dict(orig=dict(dt=0.001, nit=100000),dirk3=dict(step=0.001,Nstep=10000,_lambda=0.4358665215))
@@ -53,7 +53,7 @@ def get_times(dt_mode='dirk3'):
 
 #==================================================================================================
 def read_lorenz_data(npoints,nstride=1,r=28.0):
-    data_fpath = os.path.join(root_dir,"data","lorenz.csv")
+    data_fpath = os.path.join(scripts_dir,"..","data","lorenz.csv")
     data = []
     with open(data_fpath) as fh:
         _ = fh.readline() # skip header
@@ -80,7 +80,7 @@ def write_file(fpath,time, T):
 #==================================================================================================
 def main(mode="lorenz"):
 
-    template_dir = os.path.join(root_dir,"runs","templates",f"file-based_{mode}")
+    template_dir = os.path.join(scripts_dir,"..","runs","templates",f"file-based_{mode}")
     mode_opts = {}
     
     for time, T in get_BCs(mode=mode, **mode_opts):
