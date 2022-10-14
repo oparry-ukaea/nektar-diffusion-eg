@@ -3,6 +3,9 @@ import os
 import os.path
 import csv
 
+from gen_lorenz_data import default_params as lorenz_params
+from gen_lorenz_data import gen_data_from_times as gen_lorenz_data
+
 scripts_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Dirk3 Lambda value from https://doc.nektar.info/developerguide/5.0.2/developer-guidese22.html
@@ -18,7 +21,7 @@ def get_BCs(mode='lorenz', **mode_opts):
 #==================================================================================================
 def get_temps(times, mode='lorenz', **mode_opts):
     if mode=='lorenz':
-        T = read_lorenz_data(npoints=len(times))
+        T = [1+2*it[2]/lorenz_params["rho"] for it in gen_lorenz_data(times)]
     elif mode=='sin':
         Omega = mode_opts.get('Omega',2.0)
         T = [math.sin(Omega*time) for time in times]
@@ -52,22 +55,7 @@ def get_times(dt_mode='dirk3'):
 #==================================================================================================
 
 #==================================================================================================
-def read_lorenz_data(npoints,nstride=1,r=28.0):
-    data_fpath = os.path.join(scripts_dir,"..","data","lorenz.csv")
-    data = []
-    with open(data_fpath) as fh:
-        _ = fh.readline() # skip header
-        for ii in range(npoints):
-            line = fh.readline()
-            if ii % nstride == 0:
-                flux = 1+2*float(line.split(",")[2])/r
-                data.append(flux/k)
-    return data
-#==================================================================================================
-
-#==================================================================================================
-def write_file(fpath,time, T):
-
+def write_file(fpath, T):
     header_vals = ["x","T"]
     with open(fpath, 'w') as fh:
         writer = csv.writer(fh)
@@ -79,14 +67,17 @@ def write_file(fpath,time, T):
 
 #==================================================================================================
 def main(mode="lorenz"):
-
     template_dir = os.path.join(scripts_dir,"..","runs","templates",f"file-based_{mode}")
+    print(f"Creating BC files in {template_dir}")
+
     mode_opts = {}
     
     for time, T in get_BCs(mode=mode, **mode_opts):
         fname = "BCVals_{:5.2E}.csv".format(time)
         fpath = os.path.join(template_dir,fname)
-        write_file(fpath,time,T)
+        write_file(fpath,T)    
+    print("Done")
 #==================================================================================================
 
-main()
+if __name__=="__main__":
+    main()
