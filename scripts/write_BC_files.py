@@ -1,3 +1,4 @@
+import argparse
 import math
 import os
 import os.path
@@ -11,21 +12,21 @@ scripts_dir = os.path.dirname(os.path.realpath(__file__))
 
 k = 1 # Thermal conductivity in W/m^2/K
 #==================================================================================================
-def get_BCs(mode='lorenz', dt_mode='dirk3', **mode_opts):
+def get_BCs(template='lorenz', dt_mode='dirk3', **mode_opts):
     times = get_times(dt_mode)
-    temps = get_temps(times, mode=mode, **mode_opts)
+    temps = get_temps(times, template=template, **mode_opts)
     return zip(times,temps)
 #==================================================================================================
 
 #==================================================================================================
-def get_temps(times, mode='lorenz', **mode_opts):
-    if mode=='lorenz':
+def get_temps(times, template='lorenz', **mode_opts):
+    if template=='lorenz':
         T = [1+2*it[2]/lorenz_params["rho"]/k for it in gen_lorenz_data(times)]
-    elif mode=='sin':
+    elif template=='sin':
         Omega = mode_opts.get('Omega',2.0)
         T = [math.sin(Omega*time) for time in times]
     else:
-        exit(f"write_file: '{mode}' is not a valid mode")
+        exit(f"write_file: '{template}' is not a valid template")
     return T
 #==================================================================================================
 
@@ -41,19 +42,39 @@ def write_file(fpath, T):
 
 
 #==================================================================================================
-def main(mode="lorenz"):
-    template_dir = os.path.join(scripts_dir,"..","runs","templates",f"file-based_{mode}")
+def main(template="lorenz", dt_mode='dirk3'):
+    template_dir = os.path.join(scripts_dir,"..","runs","templates",f"file-based_{template}")
     print(f"Creating BC files in {template_dir}")
 
     mode_opts = {}
-    dt_mode='dirk3'
     
-    for time, T in get_BCs(mode=mode, dt_mode=dt_mode, **mode_opts):
+    for time, T in get_BCs(template=template, dt_mode=dt_mode, **mode_opts):
         fname = "BCVals_{:5.2E}.csv".format(time)
         fpath = os.path.join(template_dir,fname)
         write_file(fpath,T)    
     print("Done")
 #==================================================================================================
 
+#==================================================================================================
+def parseCLargs():
+    parser = argparse.ArgumentParser()
+    valid_templates = ["lorenz","sin"]
+    template_desc =  "Specify which file-based template to populate. Options are: lorenz (default), sin"
+    parser.add_argument("-t", "--template", help=template_desc)
+
+    args = parser.parse_args()
+    options = {}
+    if args.template:
+        allowed_prefix = 'file-based_'
+        template = args.template[len(allowed_prefix):] if args.template.startswith(allowed_prefix) else args.template
+        if template in valid_templates:
+            options['template'] = template
+        else:
+            exit(f"'{template}' is not a valid template; use '"+"' or '".join(valid_templates)+"'")
+    return options
+#==================================================================================================
+
+
 if __name__=="__main__":
-    main()
+    options = parseCLargs()
+    main(**options)
