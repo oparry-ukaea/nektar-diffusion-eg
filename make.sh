@@ -14,7 +14,7 @@ for arg in $*; do
         *)
             echo "Unrecognised argument: $arg"
             echo "usage:"
-            echo " $0 <mode=DEBUG|RELEASE>  (default is DEBUG) |<nekbuild=PATH_TO_NEKTAR_BUILD_DIR>"
+            echo " $0 <mode=DEBUG|RELEASE>  (default is RELEASE) |<nekbuild=PATH_TO_NEKTAR_BUILD_DIR>"
             exit 1
     esac
 done
@@ -25,7 +25,7 @@ if [ -n "$NEK_BUILD" ]; then
     MODE="CUSTOM"
 fi
 if [ -z "$MODE" ]; then
-    MODE="DEBUG"
+    MODE="RELEASE"
 fi
 
 

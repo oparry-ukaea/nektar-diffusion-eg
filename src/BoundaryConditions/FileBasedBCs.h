@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// File: ChaoticBCs.h
+// File: FileBasedBCs.h
 //
 // For more information, please see: http://www.nektar.info
 //
@@ -28,27 +28,40 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //
-// Description: Riemann invariant boundary condition
+// Description: File-based boundary conditions
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef NEKTAR_SOLVERS_COMPRESSIBLEFLOWSOLVER_BNDCOND_ChaoticBCs
-#define NEKTAR_SOLVERS_COMPRESSIBLEFLOWSOLVER_BNDCOND_ChaoticBCs
+#ifndef NEKTAR_SOLVERS_COMPRESSIBLEFLOWSOLVER_BNDCOND_FileBasedBCs
+#define NEKTAR_SOLVERS_COMPRESSIBLEFLOWSOLVER_BNDCOND_FileBasedBCs
 
 #include "CFSBndCond.h"
-
+#include <SolverUtils/Core/SessionFunction.h>
+#include <FieldUtils/Interpolator.h>
 
 namespace Nektar
 {
 
+// Structs
+struct FuncDef
+{
+    FuncDef(std::string fieldName, MultiRegions::ExpListSharedPtr field, int domain, SpatialDomains::BoundaryConditionType BCType, SolverUtils::SessionFunctionSharedPtr func) :
+    m_fieldName(fieldName), m_field(field), m_domain(domain), m_BCType(BCType), m_func(func) {}
+    SpatialDomains::BoundaryConditionType m_BCType;
+    std::string m_fieldName;
+    MultiRegions::ExpListSharedPtr m_field;
+    int m_domain;
+    SolverUtils::SessionFunctionSharedPtr m_func;
+};
+typedef std::shared_ptr<FuncDef> FuncDefShPtr;
 /**
-* @brief Chaotic boundary conditions.
+* @brief File-based boundary conditions.
 */
-class ChaoticBCs : public CFSBndCond
+class FileBasedBCs : public CFSBndCond
 {
     public:
 
-        friend class MemoryManager<ChaoticBCs>;
+        friend class MemoryManager<FileBasedBCs>;
 
         /// Creates an instance of this class
         static CFSBndCondSharedPtr create(
@@ -57,7 +70,7 @@ class ChaoticBCs : public CFSBndCond
                 const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
                 const int pSpaceDim, const int bcRegion, const int cnt)
         {
-            CFSBndCondSharedPtr p = MemoryManager<ChaoticBCs>::
+            CFSBndCondSharedPtr p = MemoryManager<FileBasedBCs>::
                                     AllocateSharedPtr(pSession, pFields,
                                     pTraceNormals, pSpaceDim, bcRegion, cnt);
             return p;
@@ -77,14 +90,21 @@ class ChaoticBCs : public CFSBndCond
         Array<OneD, NekDouble>               m_VnInf;
 
     private:
-        ChaoticBCs(const LibUtilities::SessionReaderSharedPtr& pSession,
+        std::map<int,FuncDefShPtr> m_funcDefs;
+
+        FileBasedBCs(const LibUtilities::SessionReaderSharedPtr& pSession,
                const Array<OneD, MultiRegions::ExpListSharedPtr>& pFields,
                const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
                const int pSpaceDim,
                const int bcRegion,
                const int cnt);
+
+
+
+        std::string GetBCFunctionName(int varIdx);
+        std::string GetBCFunctionName(std::string varName);
         
-        virtual ~ChaoticBCs(void){};
+        virtual ~FileBasedBCs(void){};
 };
 
 }

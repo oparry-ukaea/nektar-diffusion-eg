@@ -31,13 +31,21 @@
 *.out
 *.app
 
+# Python
+__pycache__
+
 # Build directories
 build
 buildDebug
 
 # Run directories
 runs/*
-!runs/templates/
+# Only ignore csv files in the run templates dirs
+!runs/templates
+runs/templates/**/*.csv
+
+# Data directories
+data/lorenz.csv
 
 # VS code config
 settings.json

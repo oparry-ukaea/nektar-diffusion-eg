@@ -232,7 +232,7 @@
 
     <CONDITIONS>
         <PARAMETERS>
-            <P> TimeStep       = 0.001            </P>
+            <P> TimeStep       = 0.005            </P>
             <P> NumSteps       = 1000             </P>
             <P> IO_CheckSteps  = 10               </P>
             <P> IO_InfoSteps   = 100              </P>
@@ -258,12 +258,16 @@
 
         <BOUNDARYCONDITIONS>
             <REGION REF="0">
-                <D VAR="T" USERDEFINEDTYPE="TimeDependent" VALUE="sin(2*PI*Omega*t)" />
+                <D VAR="T" USERDEFINEDTYPE="FileBasedBCs" VALUE="0" />
             </REGION>
             <REGION REF="1">
                 <D VAR="T" VALUE="0" />
             </REGION>
         </BOUNDARYCONDITIONS>
+
+        <FUNCTION NAME="TBCs"> 
+            <F VAR="T" TIMEDEPENDENT="1" FILE="BCVals_%8.2E.csv"/> 
+        </FUNCTION>
 
         <FUNCTION NAME="ExactSolution">
             <E VAR="T" VALUE="1" />
