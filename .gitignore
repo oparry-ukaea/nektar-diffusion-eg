@@ -52,4 +52,5 @@ data/lorenz.csv
 settings.json
 
 # Plots
+*.mp4
 *.png
