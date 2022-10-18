@@ -33,6 +33,7 @@
 
 # Python
 __pycache__
+env
 
 # Build directories
 build
@@ -49,3 +50,7 @@ data/lorenz.csv
 
 # VS code config
 settings.json
+
+# Plots
+*.mp4
+*.png

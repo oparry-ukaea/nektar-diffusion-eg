@@ -14,8 +14,11 @@ with various forms of boundary conditions. In particular, arbitrary BC values ca
   - NEKTAR_USE_MPI
   - NEKTAR_UTILITY_FIELDCONVERT
   - NEKTAR_UTILITY_NEKMESH
+  - NEKTAR_BUILD_PYTHON (only required for generating plots)
 - CMake (tested with version 3.16.3)
 - Python 3 (tested with version 3.8.10)
+- ffmpeg (only required for animate_T_prof.py)
+  - On Debian-based systems, install with `sudo apt install -u ffmpeg`.
 ## Building
 To build the solver, run
 ```
@@ -38,3 +41,22 @@ If no template is specified, `file-based_lorenz` will be used. By default, outpu
   ./run.sh subdir=my_run
 ```
 will output to runs/my_run.
+
+## Plotting results
+The scripts in ./scripts/plots can be used to plot some useful quanties from Nektar runs.
+To use them, a Python environment needs to be set up using a script.
+The script requires that you have
+- an ssh key associated with your github account and
+- access to the repository at https://github.com/oparry-ukaea/NekPlot
+
+The environment can be created and activated using:
+```
+./scripts/plots/make_env.sh [PATH_TO_NEKTAR_BUILD_DIR]
+. env/build/activate
+```
+(Note the extra CMake setting mentioned in the [requirements](#requirements) section - the Nektar install in `[PATH_TO_NEKTAR_BUILD_DIR]` must have `NEKTAR_BUILD_PYTHON` defined.)
+
+With the environment activated, you can run scripts with, e.g.
+```
+python scripts/plots/plot_boundary_gradients_evo.py  
+```
