@@ -11,3 +11,6 @@ def get_run_root(subdir):
 
 def get_plot_path(fname):
     return os.path.join(LOCATIONS["plots_dir"],fname)
+
+def get_template_root(template):
+    return os.path.join(LOCATIONS["runs_dir"],"templates",template)
