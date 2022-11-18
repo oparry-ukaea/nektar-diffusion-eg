@@ -61,7 +61,20 @@ if [ -e "$run_dir" ]; then
     \rm -rf "$run_dir"
 fi
 
+# Copy template
 cp -r "$RUN_TEMPLATE" "$run_dir"
+
+# Set command line from file, if it exists
+cmd_line="mpirun -np 4 $EXEC_PATH session.xml"
+cmd_line_file="$run_dir/cmd_line.txt"
+if [ -f "$cmd_line_file" ]; then
+    cmd_line=$(sed -e 's|<BIN_DIR>|'"$BIN_DIR"'|g' < "$cmd_line_file")
+    \rm "$cmd_line_file"
+fi
+
+echo "Running [$cmd_line]"
+
+# cd to run directory and run cmd_line
 cd "$run_dir" 
-mpirun -np 4 "$EXEC_PATH" session.xml
+"$cmd_line"
 cd -
