@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5.1)
 
-PROJECT(ADRSolver)
+PROJECT(CoupledBCsSolvers)
 
 # Nektar++ requires C++14.
 SET(CMAKE_CXX_STANDARD 14)
@@ -14,36 +14,57 @@ ENDIF()
 
 # Find Nektar++
 FIND_PACKAGE(Nektar++ REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${NEKTAR++_INCLUDE_DIRS} ${NEKTAR++_TP_INCLUDE_DIRS})
-LINK_DIRECTORIES(${NEKTAR++_LIBRARY_DIRS} ${NEKTAR++_TP_LIBRARY_DIRS})
 MESSAGE(STATUS "Found Nektar++: version ${NEKTAR++_VERSION}")
 
 # Set RPATH for wherever Nektar++ is installed.
-SET(CMAKE_INSTALL_RPATH "${NEKTAR++_LIBRARY_DIRS}")
-
-# Components of the Nektar++ package to build
-OPTION(NEKTAR_BUILD_DOCS    "Build the latex document." OFF)
-IF (NEKTAR_BUILD_DOCS)
-	INCLUDE_DIRECTORIES(docs)
-	ADD_SUBDIRECTORY(docs)
-ENDIF (NEKTAR_BUILD_DOCS)
+SET(CMAKE_INSTALL_RPATH "${NEKTAR++_LIBRARY_DIRS}" "${NEKTAR++_TP_LIBRARY_DIRS}")
 
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
   ADD_DEFINITIONS(-DDEBUG)
 ENDIF()
 
-# Add source files.
-ADD_EXECUTABLE(ADRSolver
-    src/ADRSolver.cpp
-    src/UnsteadyDiffusion.h
-    src/UnsteadyDiffusion.cpp
-    src/BoundaryConditions/CFSBndCond.h
+set(COMMON_SRC_FILES
     src/BoundaryConditions/CFSBndCond.cpp
-    src/BoundaryConditions/FileBasedBCs.h
-    src/BoundaryConditions/FileBasedBCs.cpp
+    src/BoundaryConditions/CWIPIBCs.cpp
     )
 
-# Add target link libraries.
-TARGET_LINK_LIBRARIES(ADRSolver ${NEKTAR++_LIBRARIES} ${NEKTAR++_TP_LIBRARIES})
-INSTALL(TARGETS ADRSolver DESTINATION ${CMAKE_INSTALL_PREFIX})
+#==================== ADR Solver ====================
+# Source files
+set(ADRSOLVER_SRC_FILES
+    src/ADRSolver.cpp
+    src/UnsteadyDiffusion.cpp
+    src/BoundaryConditions/CWIPIBCsReceiver.cpp
+    src/BoundaryConditions/FileBasedBCs.cpp 
+    ${COMMON_SRC_FILES}
+    )
+
+# Target
+ADD_EXECUTABLE(ADRSolver ${ADRSOLVER_SRC_FILES})
+
+# Compiler defs, includes, link libraries
 TARGET_COMPILE_DEFINITIONS(ADRSolver PUBLIC ${NEKTAR++_DEFINITIONS})
+TARGET_INCLUDE_DIRECTORIES(ADRSolver PUBLIC ${NEKTAR++_INCLUDE_DIRS} ${NEKTAR++_TP_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(ADRSolver ${NEKTAR++_LIBRARIES} ${NEKTAR++_TP_LIBRARIES})
+
+# Install exec
+INSTALL(TARGETS ADRSolver DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+#==================== BCProvider ====================
+# Source files
+set(BCPROVIDER_SRC_FILES
+    src/BCProvider/BCProvider.cpp
+    src/BCProvider/BCProviderSystem.cpp
+    src/BoundaryConditions/CWIPIBCsSender.cpp 
+    ${COMMON_SRC_FILES}
+    )
+
+# Target
+ADD_EXECUTABLE(BCProvider ${BCPROVIDER_SRC_FILES})
+
+# Target compiler defs, includes, link libraries for the BCProvider
+TARGET_COMPILE_DEFINITIONS(BCProvider PUBLIC ${NEKTAR++_DEFINITIONS})
+TARGET_INCLUDE_DIRECTORIES(BCProvider PUBLIC ${NEKTAR++_INCLUDE_DIRS} ${NEKTAR++_TP_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(BCProvider ${NEKTAR++_LIBRARIES} ${NEKTAR++_TP_LIBRARIES})
+
+# Install exec
+INSTALL(TARGETS BCProvider DESTINATION ${CMAKE_INSTALL_PREFIX})

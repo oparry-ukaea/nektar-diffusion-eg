@@ -35,9 +35,10 @@
 #ifndef NEKTAR_SOLVERS_ADRSOLVER_EQUATIONSYSTEMS_UNSTEADYDIFFUSION_H
 #define NEKTAR_SOLVERS_ADRSOLVER_EQUATIONSYSTEMS_UNSTEADYDIFFUSION_H
 
-#include "BoundaryConditions/CFSBndCond.h"
-#include <SolverUtils/UnsteadySystem.h>
 #include <SolverUtils/Diffusion/Diffusion.h>
+#include <SolverUtils/UnsteadySystem.h>
+
+#include "BoundaryConditions/CFSBndCond.h"
 
 using namespace Nektar::SolverUtils;
 
@@ -62,7 +63,7 @@ namespace Nektar
         static std::string className;
 
         /// Destructor
-        virtual ~UnsteadyDiffusion();
+        virtual ~UnsteadyDiffusion(){};
 
     protected:
         bool m_useSpecVanVisc;
@@ -71,13 +72,13 @@ namespace Nektar
         SolverUtils::DiffusionSharedPtr         m_diffusion;
         SolverUtils::RiemannSolverSharedPtr     m_riemannSolver;
 
-        virtual void v_GenerateSummary(SummaryList &s);
+        virtual void v_GenerateSummary(SummaryList &s) override;
 
         UnsteadyDiffusion(
             const LibUtilities::SessionReaderSharedPtr& pSession,
             const SpatialDomains::MeshGraphSharedPtr& pGraph);
 
-        virtual void v_InitObject();
+        virtual void v_InitObject(bool DeclareField = true) override;
 
         void GetFluxVector(
             const Array<OneD, Array<OneD, NekDouble> > &inarray,
@@ -91,7 +92,7 @@ namespace Nektar
             const Array<OneD, const Array<OneD, NekDouble> > &inarray,
                   Array<OneD,       Array<OneD, NekDouble> > &outarray,
             const NekDouble time);
-        virtual void DoImplicitSolve(
+        void DoImplicitSolve(
             const Array<OneD, const Array<OneD, NekDouble> >&inarray,
                   Array<OneD,       Array<OneD, NekDouble> >&outarray,
             NekDouble time,
@@ -101,7 +102,6 @@ namespace Nektar
         NekDouble m_epsilon;
         std::vector<CFSBndCondSharedPtr> m_userDefinedBCs;
         StdRegions::VarCoeffMap m_varcoeff;
-        NekDouble m_waveFreq;
 
         void SetUserDefinedBoundaryConditions(Array<OneD, Array<OneD, NekDouble>> &physarray, NekDouble time);
     };

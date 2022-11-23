@@ -56,11 +56,9 @@ namespace Nektar
     /**
      * @brief Initialisation object for the unsteady diffusion problem.
      */
-    void UnsteadyDiffusion::v_InitObject()
+    void UnsteadyDiffusion::v_InitObject(bool DeclareField)
     {
         UnsteadySystem::v_InitObject();
-
-        m_session->LoadParameter("wavefreq",   m_waveFreq, 0.0);
         m_session->LoadParameter("epsilon",    m_epsilon,  1.0);
 
         m_session->MatchSolverInfo(
@@ -144,25 +142,19 @@ namespace Nektar
             {
                 if (!userFuncName.empty() && userFuncName!="TimeDependent")
                 {
-                    m_userDefinedBCs.push_back(GetCFSBndCondFactory().CreateInstance(
+                    CFSBndCondSharedPtr userDefinedBC = GetCFSBndCondFactory().CreateInstance(
                                             userFuncName,
                                             m_session,
                                             m_fields,
                                             m_traceNormals,
                                             m_spacedim,
                                             n,
-                                            cnt));
+                                            cnt);
+                    m_userDefinedBCs.push_back(userDefinedBC);
                 }
                 cnt += m_fields[0]->GetBndCondExpansions()[n]->GetExpSize();
             }
         }
-    }
-
-    /**
-     * @brief Unsteady diffusion problem destructor.
-     */
-    UnsteadyDiffusion::~UnsteadyDiffusion()
-    {
     }
 
     void UnsteadyDiffusion::v_GenerateSummary(SummaryList& s)
@@ -244,7 +236,7 @@ namespace Nektar
                 for(auto i = 0; i < nvariables; ++i)
                 {
                     m_fields[i]->FwdTrans(inarray[i], coeffs);
-                    m_fields[i]->BwdTrans_IterPerExp(coeffs, outarray[i]);
+                    m_fields[i]->BwdTrans(coeffs, outarray[i]);
                 }
                 break;
             }
