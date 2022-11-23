@@ -1,0 +1,1 @@
+mpirun -np 2 <BIN_DIR>/ADRSolver --cwipi diff-solver diff-solver_session.xml : -np 2 <BIN_DIR>/BCProvider --cwipi bc-provider bc-provider_session.xml

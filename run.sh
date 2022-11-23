@@ -2,7 +2,7 @@
 
 # Defaults - run in debug and output to a subdirectory tagged with the current date and time
 MODE="RELEASE"
-TEMPLATE_SUBDIR="2d-diff"
+TEMPLATE_SUBDIR="cwipi-BCs"
 # Parse command line args
 for arg in $*; do
     case "$arg" in
@@ -76,5 +76,5 @@ echo "Running [$cmd_line]"
 
 # cd to run directory and run cmd_line
 cd "$run_dir" 
-"$cmd_line"
+eval "$cmd_line"
 cd -
