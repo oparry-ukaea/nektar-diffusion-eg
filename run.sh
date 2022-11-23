@@ -2,7 +2,7 @@
 
 # Defaults - run in debug and output to a subdirectory tagged with the current date and time
 MODE="RELEASE"
-TEMPLATE_SUBDIR="file-based_lorenz"
+TEMPLATE_SUBDIR="2d-diff"
 # Parse command line args
 for arg in $*; do
     case "$arg" in
