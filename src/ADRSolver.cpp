@@ -45,14 +45,18 @@ void confirm_start(LibUtilities::CommSharedPtr comm) {
     int cont=0;
     if (comm->TreatAsRankZero())
     {
-        std:: cout << "[Y/y] to continue" << std::endl;
+        std:: cout << "ADRSolver: Press [Y/y] to continue" << std::endl;
         std::string response;
         std::cin >> response;
         boost::to_upper(response);
         cont = (response=="Y");
     }
     comm->Bcast(cont, 0);
-    if (!cont)
+    if (cont)
+    {
+        std:: cout << "Continuing..." << std::endl;
+    }
+    else
     {
         if (comm->TreatAsRankZero())
         {

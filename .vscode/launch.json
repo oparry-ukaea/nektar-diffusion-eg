@@ -5,10 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug (Attach)",
+            "name": "ADRSolver Debug (Attach)",
             "type": "cppdbg",
             "request": "attach",
             "program": "${workspaceFolder}/buildDebug/dist/ADRSolver",
+            "setupCommands": [ { "text": "-enable-pretty-printing" } ],
+            "linux": {
+              "MIMode": "gdb",
+              "miDebuggerPath": "/usr/bin/gdb"
+            }
+          },
+          {
+            "name": "BCProvider Debug (Attach)",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/buildDebug/dist/BCProvider",
             "setupCommands": [ { "text": "-enable-pretty-printing" } ],
             "linux": {
               "MIMode": "gdb",
