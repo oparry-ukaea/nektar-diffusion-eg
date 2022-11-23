@@ -49,7 +49,8 @@ def plot_2d_field(data_src,varname,mode='scatter',log=False,output_fpath='2d_fie
 
         plt.imshow(u,interpolation='none', extent=[min(xb),max(xb),min(yb),max(yb)],aspect=0.2,vmax=np.percentile(u,98))
     elif mode=='scatter':
-        axes.scatter(x, y, c=f, label=data_src.label, **data_src.get_plot_kws())
+        scatter = axes.scatter(x, y, c=f, label=data_src.label, **data_src.get_plot_kws())
+        fig.colorbar(scatter, ax=axes)
     else:
         raise ValueError(f"plot_T_field: {mode} is not a valid mode string")
 
@@ -69,15 +70,14 @@ class AnimatedScatter(object):
 
         # Setup the figure and axes...
         self.fig, self.ax = plt.subplots()
-        # Then setup FuncAnimation.
-        self.ani = mpl_animation.FuncAnimation(self.fig, self.update, interval=1, 
-                                          init_func=self.setup_plot, frames=len(data_srcs), blit=False)
 
-    def setup_plot(self):
-        """First frame."""
-        first_src = self.data_srcs[0]
+        # Plot first frame to set up colorbar
+        first_src = self.data_srcs[5]
         self.scat = self.ax.scatter(first_src.get('x'), first_src.get('y'), c=first_src.get(self.varname), **first_src.get_plot_kws())
-        return self.scat,
+        self.fig.colorbar(self.scat,ax=self.ax)
+
+        # Then setup FuncAnimation.
+        self.ani = mpl_animation.FuncAnimation(self.fig, self.update, interval=1, frames=len(data_srcs), blit=False)
 
     def update(self, i):
         """Frame i."""

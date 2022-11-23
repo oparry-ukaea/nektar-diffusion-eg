@@ -2,17 +2,17 @@ from NekPlot.data import get_source
 from .plotting import get_plot_style
 
 #--------------------------------------------------------------------------------------------------
-def read_nektar_src(run_dir,chk_num,plot_style="points"):
-    nek_src = get_source("nektar", run_dir, chk_num=chk_num, label=f"Checkpoint {chk_num}")
+def read_nektar_src(run_dir,chk_num,plot_style="points", **src_kwargs):
+    nek_src = get_source("nektar", run_dir, chk_num=chk_num, label=f"Checkpoint {chk_num}", **src_kwargs)
     nek_src.set_plot_kws(get_plot_style(plot_style))
     return nek_src
 #--------------------------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------------------------
-def read_all_nektar_srcs(run_dir, chk_start=0,chk_end=99,chk_stride=1,compute_gradients=False,plot_style="points"):
+def read_all_nektar_srcs(run_dir, chk_start=0,chk_end=99,chk_stride=1,compute_gradients=False,plot_style="points", **src_kwargs):
     data_srcs = []
     for chk_num in range(chk_start,chk_end+chk_stride,chk_stride):
-        nek_src = get_source("nektar", run_dir, chk_num=chk_num, label=f"Checkpoint {chk_num}")
+        nek_src = get_source("nektar", run_dir, chk_num=chk_num, label=f"Checkpoint {chk_num}", **src_kwargs)
         params =  nek_src.get_session().GetParameters()
         nek_src.label = "t = {:.2f}".format(params["TIMESTEP"]*params["IO_CHECKSTEPS"]*(chk_num))
         if compute_gradients:
