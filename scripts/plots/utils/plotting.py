@@ -72,7 +72,7 @@ class AnimatedScatter(object):
         self.fig, self.ax = plt.subplots()
 
         # Plot first frame to set up colorbar
-        first_src = self.data_srcs[5]
+        first_src = self.data_srcs[0]
         self.scat = self.ax.scatter(first_src.get('x'), first_src.get('y'), c=first_src.get(self.varname), **first_src.get_plot_kws())
         self.fig.colorbar(self.scat,ax=self.ax)
 
