@@ -57,7 +57,8 @@ class CWIPIBCs : public CFSBndCond
                const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
                const int pSpaceDim,
                const int bcRegion,
-               const int cnt);
+               const int cnt,
+               const int initDelay_ms);
 
         virtual ~CWIPIBCs(void){};
 

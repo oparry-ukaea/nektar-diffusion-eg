@@ -37,6 +37,7 @@
 #include "CWIPIBCs.h"
 
 #include <cmath>
+#include <unistd.h>
 
 using namespace std;
 
@@ -48,9 +49,11 @@ CWIPIBCs::CWIPIBCs(
            const Array<OneD, Array<OneD, NekDouble> >& pTraceNormals,
            const int pSpaceDim,
            const int bcRegion,
-           const int cnt)
+           const int cnt,
+           const int initDelay_ms)
     : CFSBndCond(pSession, pFields, pTraceNormals, pSpaceDim, bcRegion, cnt)
 {
+    sleep(initDelay_ms);
     InitCWIPI(pSession);
     // Set coupling step params - defaults are 0 to 1e9 with a frequency of 1
     pSession->LoadParameter("FirstCouplingStep",m_FirstCouplingStep,0);

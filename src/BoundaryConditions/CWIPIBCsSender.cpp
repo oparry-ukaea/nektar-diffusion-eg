@@ -55,7 +55,7 @@ CWIPIBCsSender::CWIPIBCsSender(
            const int pSpaceDim,
            const int bcRegion,
            const int cnt)
-    : CWIPIBCs(pSession, pFields, pTraceNormals, pSpaceDim, bcRegion, cnt)
+    : CWIPIBCs(pSession, pFields, pTraceNormals, pSpaceDim, bcRegion, cnt, 1)
 {
 }
 
