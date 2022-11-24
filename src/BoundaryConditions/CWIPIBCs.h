@@ -64,7 +64,9 @@ class CWIPIBCs : public CFSBndCond
         int m_CouplingStepFreq;
         std::vector<std::string> m_couplingVarNames;
         int m_FirstCouplingStep;
+        // The final step on which to send/receive coupling data
         int m_LastCouplingStep;
+        // The step on which coupling data was last sent/received
         int m_PrevCouplingStep;
         int GetStep(const double &time);
         void InitCWIPI(const LibUtilities::SessionReaderSharedPtr& pSession);

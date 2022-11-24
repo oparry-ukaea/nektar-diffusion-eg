@@ -36,6 +36,8 @@
 
 #include "CWIPIBCsReceiver.h"
 
+#include <math.h> ////
+
 using namespace std;
 
 namespace Nektar
@@ -62,36 +64,53 @@ void CWIPIBCsReceiver::v_Apply(
         Array<OneD, Array<OneD, NekDouble> >               &physarray,
         const NekDouble                                    &time)
 {
-    Array<OneD, Array<OneD, NekDouble> > BCVals(m_couplingVarNames.size());
-    int npoints = m_fields[0]->GetNpoints();
-
-    // Set default BC values to 0
-    BCVals[0] = Array<OneD, NekDouble>(npoints, 0.0);
+    int nFields = m_fields.size();
+    
+    // Set up receive array
+    Array<OneD, Array<OneD, NekDouble> > RecData(nFields);
+    for(auto ifld = 0; ifld < nFields; ++ifld)
+    {
+        int npoints = m_fields[ifld]->GetNpoints();
+        RecData[ifld] = Array<OneD, NekDouble>(npoints, 0.0);
+    }
 
     // If this is a coupling step, receive new values
     int step = GetStep(time);
     if (IsCouplingStep(step)) {
-        m_coupling->Receive(step, time, BCVals, m_couplingVarNames);
+        m_coupling->Receive(step, time, RecData, m_couplingVarNames);
+
+    //     //=====================================================================
+    //     // Debugging
+    //     if (m_session->GetComm()->TreatAsRankZero()){
+    //             int ii=0;
+    //             int n_changed=0;
+    //             NekDouble tol = 1e-3;
+
+    //             Array<OneD, NekDouble> x(m_fields[0]->GetNpoints()), y(m_fields[0]->GetNpoints());
+    //             m_fields[0]->GetCoords(x, y);
+
+    //             for(auto jj=0;jj<RecData[ii].size(); jj++){
+    //                 NekDouble exp_val = sin(y[jj]*2*M_PI);
+    //                 NekDouble diff = std::abs((RecData[ii][jj]-exp_val)/exp_val);
+    //                 if (diff > tol){
+    //                     n_changed++;
+    //                 }
+    //             }
+    //             std::cout << "[RECEIVE step =" << step << ", time= " << time << "] " << n_changed << "/" << RecData[ii].size() << " outside tol" << std::endl;
+    //         }
+    //     //=====================================================================
     } 
 
     // Apply values
-    for(auto ii = 0; ii < physarray.size(); ++ii)
+    for(auto ifld = 0; ifld < nFields; ++ifld)
     {
-        // Get conditions for this field, region
-        MultiRegions::ExpListSharedPtr locExpList = m_fields[ii]->GetBndCondExpansions()[m_bcRegion];
-
-        // // Debugging
-        // if (m_session->GetComm()->TreatAsRankZero()){
-        //     int nprint=5;
-        //     std::cout << "time = " << time << "; Receiver setting values: [";
-        //     for (auto ii=0;ii<nprint;ii++){
-        //         std::cout << BCVals[0][ii] << ", ";
-        //     }
-        //     std::cout << "]" << std::endl;
-        // }
-
-        locExpList->UpdatePhys() = BCVals[ii];
-
+        MultiRegions::ExpListSharedPtr locExpList = m_fields[ifld]->GetBndCondExpansions()[m_bcRegion];
+        for (auto iloc=0;iloc<locExpList->GetNpoints();iloc++)
+        {
+            int irec = iloc; // <- What's the correct mapping here?
+            locExpList->UpdatePhys()[iloc] = RecData[ifld][irec];
+        }
+        
         locExpList->FwdTransBndConstrained(locExpList->GetPhys(), locExpList->UpdateCoeffs());
     }
 }

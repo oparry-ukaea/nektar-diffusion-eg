@@ -36,6 +36,8 @@
 
 #include "CWIPIBCsSender.h"
 
+#include <math.h> ////
+
 using namespace std;
 
 namespace Nektar
@@ -62,25 +64,42 @@ void CWIPIBCsSender::v_Apply(
         Array<OneD, Array<OneD, NekDouble> >               &physarray,
         const NekDouble                                    &time)
 {
-    // If this is a coupling step, send values
+    int nFields = m_fields.size();
+
+    // // For now, set a single value along the (local) boundary; magnitude = simulation time    
+    // for(auto ifld = 0; ifld < nFields; ++ifld)
+    // {
+    //     MultiRegions::ExpListSharedPtr locExpList = m_fields[ifld]->GetBndCondExpansions()[m_bcRegion];
+    //     Array<OneD, NekDouble> BCVals(locExpList->GetNpoints(), time);
+    //     locExpList->UpdatePhys() = BCVals;
+    //     locExpList->FwdTransBndConstrained(locExpList->GetPhys(), locExpList->UpdateCoeffs());
+    // }
+
     int step = GetStep(time);
     if (IsCouplingStep(step)) {
-        Array<OneD, Array<OneD, NekDouble> > SendData(m_couplingVarNames.size());
-
-        // Send values fixed to constant for now
-        int npoints = m_fields[0]->GetNpoints();
-        SendData[0] = Array<OneD, NekDouble>(npoints, time);
-
-        // // Debugging
-        // if (m_session->GetComm()->TreatAsRankZero()){
-        //     int nprint=3;
-        //     std::cout << "time = " << time << "; Send: [";
-        //     for (auto ii=0;ii<nprint;ii++){
-        //         std::cout << SendData[0][ii] << ", ";
-        //     }
-        //     std::cout << "]" << std::endl;
+        // // If this is a coupling step, extract local boundary values
+        // Array<OneD, Array<OneD, NekDouble> > SendData(nFields);
+        // for(auto ifld = 0; ifld < nFields; ++ifld) {
+        //     MultiRegions::ExpListSharedPtr locExpList = m_fields[ifld]->GetBndCondExpansions()[m_bcRegion];
+        //     SendData[ifld] = locExpList->GetPhys();
         // }
 
+        //=====================================================================
+        // Set dummy send values for debugging
+        Array<OneD, Array<OneD, NekDouble> > SendData(nFields);
+        for(auto ifld = 0; ifld < nFields; ++ifld) {
+            int npoints = m_fields[0]->GetNpoints();
+            SendData[ifld] = Array<OneD, NekDouble>(m_fields[ifld]->GetNpoints(), -1);
+            Array<OneD, NekDouble> x(npoints), y(npoints);
+            m_fields[0]->GetCoords(x, y);
+            for (auto ipt=0;ipt<npoints;ipt++)
+            {
+                SendData[ifld][ipt] = sin(y[ipt]*2*M_PI);
+            }
+        }
+        //=====================================================================
+
+        // Send values
         m_coupling->Send(step, time, SendData, m_couplingVarNames);
     }
 }
